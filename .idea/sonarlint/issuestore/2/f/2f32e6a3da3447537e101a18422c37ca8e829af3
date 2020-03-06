@@ -1,7 +1,35 @@
 
-Mpython:S1481q")Remove the unused local variable "essai".(ƒ‰Öôøÿÿÿÿ8„š»ˆ.
-qpython:S100p"NRename method "waitFor" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(ÛĞÓôşÿÿÿÿ8„š»ˆ.
-wpython:S100"SRename method "pointElement" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(”¥´¬ùÿÿÿÿ8„š»ˆ.
-xpython:S117)"URename this parameter "nSecondes" to match the regular expression ^[_a-z][a-z0-9_]*$.(ãèéşÿÿÿÿ8Î®´ˆ.
-gpython:S100"IRename method "go" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(§Õ–Ê8‰Á®´ˆ.
-npython:S116"PRename this field "fastMode" to match the regular expression ^[_a-z][_a-z0-9]*$.(Á±Óâ8æŠê¼ˆ.
+>python:S125È"Remove this commented out code.(™å˜8‹’»ıŠ.
+|python:S117Õ"XRename this local variable "dtStart" to match the regular expression ^[_a-z][a-z0-9_]*$.(ÑŸåƒşÿÿÿÿ8‹’»ıŠ.
+{python:S117™"WRename this parameter "offsetInSec" to match the regular expression ^[_a-z][a-z0-9_]*$.(ß´ğÓøÿÿÿÿ8‹’»ıŠ.
+=python:S125I"Remove this commented out code.(ù¼Š8»í‰ÕŠ.
+upython:S100Ø"QRename method "waitForURL" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(–Æ’œşÿÿÿÿ8‹’»ıŠ.
+|python:S117©"XRename this local variable "sOffset" to match the regular expression ^[_a-z][a-z0-9_]*$.(ãıø»üÿÿÿÿ8‹’»ıŠ.
+spython:S116#"PRename this field "startLog" to match the regular expression ^[_a-z][_a-z0-9]*$.(¦­Ÿéıÿÿÿÿ8¿”£³‰.
+rpython:S100Î"NRename method "waitFor" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(ÛĞÓôşÿÿÿÿ8‹’»ıŠ.
+=python:S125Ÿ"Remove this commented out code.(”»—y8‹’»ıŠ.
+xpython:S3776N"TRefactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.(íŸş‰øÿÿÿÿ8Ãı‘‡Š.
+Cpython:S125´"Remove this commented out code.(ùº³ûÿÿÿÿ8‹’»ıŠ.
+rpython:S100¿"SRename method "getSoundFile" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(©—Ü8‹’»ıŠ.
+wpython:S100ı"SRename method "pointElement" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(”¥´¬ùÿÿÿÿ8‹’»ıŠ.
+Lpython:S1481¹"'Remove the unused local variable "elt".(Öã¦Ñøÿÿÿÿ8‹’»ıŠ.
+upython:S117§"VRename this parameter "delayInSec" to match the regular expression ^[_a-z][a-z0-9_]*$.(øÍÖ¦8‹’»ıŠ.
+Npython:S1481Ï")Remove the unused local variable "essai".(ƒ‰Öôøÿÿÿÿ8‹’»ıŠ.
+tpython:S116$"VRename this field "videoBatchFile" to match the regular expression ^[_a-z][_a-z0-9]*$.(÷é¬…8ø¨”ÓŠ.
+gpython:S100:"IRename method "go" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(’ı¢ƒ8‰Á®´ˆ.
+tpython:S116"VRename this field "dtStartCapture" to match the regular expression ^[_a-z][_a-z0-9]*$.(æ‚Ü·8‹’»ıŠ.
+xpython:S117e"URename this parameter "nSecondes" to match the regular expression ^[_a-z][a-z0-9_]*$.(ãèéşÿÿÿÿ8Î®´ˆ.
+xpython:S3776k"TRefactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.(ï”íõüÿÿÿÿ8“ë•³Š.
+ypython:S3776ª"TRefactor this function to reduce its Cognitive Complexity from 32 to the 15 allowed.(ÇÄŞùÿÿÿÿ8‹’»ıŠ.
+Jpython:S1481±"%Remove the unused local variable "i".(ĞÇÑáüÿÿÿÿ8‹’»ıŠ.
+Epython:S1481¿"%Remove the unused local variable "k".(³×¦ó8‹’»ıŠ.
+npython:S116"PRename this field "fastMode" to match the regular expression ^[_a-z][_a-z0-9]*$.(Á±Óâ8æŠê¼ˆ.
+Npython:S1481Ù")Remove the unused local variable "essai".(ƒ‰Öôøÿÿÿÿ8‹’»ıŠ.
+ppython:S107™"LMethod "add_sound" has 8 parameters, which is greater than the 7 authorized.(ß´ğÓøÿÿÿÿ8‹’»ıŠ.
+rpython:S100B"ORename method "getDelay" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(ÍñÓÑüÿÿÿÿ8“ë•³Š.
+}python:S117™"YRename this parameter "durationInSec" to match the regular expression ^[_a-z][a-z0-9_]*$.(ß´ğÓøÿÿÿÿ8‹’»ıŠ.
+qpython:S100§"RRename method "insertCache" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(øÍÖ¦8‹’»ıŠ.
+~python:S117¬"ZRename this local variable "sDuration" to match the regular expression ^[_a-z][a-z0-9_]*$.(ÍÖı¥úÿÿÿÿ8‹’»ıŠ.
+vpython:S100¯"RRename method "removeCache" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(ÊÒî¨ÿÿÿÿÿ8‹’»ıŠ.
+Ipython:S1481_"%Remove the unused local variable "i".(î£”±ûÿÿÿÿ8¨¥á†Š.
+ƒpython:S117™"_Rename this parameter "startInMilliseconds" to match the regular expression ^[_a-z][a-z0-9_]*$.(ß´ğÓøÿÿÿÿ8‹’»ıŠ.

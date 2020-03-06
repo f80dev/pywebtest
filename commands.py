@@ -54,6 +54,7 @@ class User:
 
 
     def login(self,username, password):
+
         self.tools.go(domain+"/login")
         self.tools.subtitle("L'utilisateur choisi une connexion par email")
 

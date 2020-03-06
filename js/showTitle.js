@@ -1,3 +1,8 @@
+//#1=title
+//#2=subtitle
+//#3=delay in millisecond
+//#4=style
+
 function createCSS(content){
     var style = document.createElement('style');
     style.type = 'text/css';
@@ -24,9 +29,9 @@ doc.body.appendChild(div);
 setTimeout(function(){div.style.opacity="1";},10);
 
 if(#3<100000){
-    setTimeout(function(){div.innerHTML+="<br><br><br><div style='#4;font-size:2.5vw;'>#2</div>";},#3/3+1);
-    setTimeout(function(){div.style.opacity="0"},#3);
-    setTimeout(function(){doc.body.removeChild(div);},#3+2000);
+    setTimeout(function(){div.innerHTML+="<br><br><br><div style='#4;font-size:2.5vw;'>#2</div>";},#3/5+1);
+    setTimeout(function(){div.style.opacity="0"},#3-2000);
+    setTimeout(function(){doc.body.removeChild(div);},#3);
 } else {
     setTimeout(function(){div.innerHTML+="<br><div style='#4;margin-top:5vh;font-size:2.5vw;'>#2</div>";},1000);
 }

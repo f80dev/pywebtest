@@ -1,3 +1,5 @@
+//#1=id du cache
+
 function removeCache(){
     document.body.removeChild(document.getElementById("#1"));
 }
