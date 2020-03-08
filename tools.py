@@ -104,12 +104,13 @@ class Tools:
             sleep(nSecondes)
 
 
-    def find(self,id,index=0,pere=None):
+    def find(self,id,index=0,pere=None,onlyId=False):
         if pere is None:pere=self.browser
 
         if type(id)==str:
             obj=pere.element(id=id)
             if not obj.exist:
+                if onlyId:return None
                 objs=pere.elements(name=id)
                 if len(objs) == 0: objs = pere.elements(tag_name=id)
                 if len(objs)==0:objs=pere.elements(class_name=id)
@@ -169,7 +170,7 @@ class Tools:
 
     def fill_form(self,values,first=None,validate=None):
         if not first is None:
-            self.find(first,0).focus()
+            self.focus(self.find(first,0))
 
         index=0
         for val in values:
@@ -213,7 +214,7 @@ class Tools:
         dtStart= self.now()
         text=text.replace("{{ENTER}}",Keys.ENTER)
         for ch in text:
-            self.wait(randint(0,100)/1000)
+            self.wait(randint(0,100)/5000)
             self.browser.send_keys(ch)
 
         self.add_sound("./clavier.wav", dtStart, (self.now() - dtStart), 0.6, 0, 0, 0)
@@ -285,7 +286,10 @@ class Tools:
         return param in self.browser.url
 
 
+
+
     def stop(self,offset=0):
+        if len(self.frames)==0:return False
         self.log("Fin de la capture")
         self.scheduler.remove_job(job_id="capture_job")
         video = cv2.VideoWriter('./'+self.capture_file+'.avi',
@@ -302,7 +306,6 @@ class Tools:
         video.release()
         cv2.destroyAllWindows()
 
-
         self.log("Production du fichier BAT de génération du film")
 
         #format = self.videoBatchFile.substring(videoFile.lastIndexOf(".") + 1).toLowerCase().trim();
@@ -317,8 +320,13 @@ class Tools:
         self.histo=list()
 
 
+
+
+
     def close(self):
         self.scheduler.shutdown()
+
+
 
 
     def job_capture(self):
@@ -452,6 +460,7 @@ class Tools:
     def subtitle(self,text,position="90vh"):
         delay=0
         if not text in self.histo:
+            self.log(text)
             self.histo.append(text)
             if position=="top":position="10vh"
             delay = self.speak(text)
@@ -563,4 +572,9 @@ class Tools:
 
     def add_click(self):
         self.add_sound("./click.mp3", self.now(), 0.2, 0.6, 0, 0, 0)
+
+    def focus(self, node):
+        if node is None:return False
+        node.focus()
+        return True
 

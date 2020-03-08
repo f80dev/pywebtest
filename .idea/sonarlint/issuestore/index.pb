@@ -22,3 +22,5 @@ A
 mail_campagne.bat,b\5\b527dd62ac03e690fbef878c9cb512a301f2e8e2
 A
 js/removeCache.js,8\0\8047d58cd3fbe37e5ffcf37fdac0e81a0f61eedd
+@
+create_cours.bat,9\b\9bf10c2971d31ef84c1f89594f387245331c57d2

@@ -24,14 +24,17 @@ class FemisUser(Tools):
 
     def login(self,username,password):
         if len(username)>0 and len(password)>0:
-            self.title("Première connexion à OASIS", "usage du login et du mot de passe")
-            self.subtitle("Pour se connecter, on utilise l'identifiant et le mot de passe fourni par l'administrateur à la création du compte")
-            self.fill_form([username,password])
-            self.show("themeMainColor pull-right flipLink","En cas d'oublie, on peut toujours se faire renvoyer son mot de passe")
-            rc=self.click("SubmitLoginBtn")
-            self.subtitle("L'utilisateur est automatiquement reconnecté sur sa dernière page consulté")
-            self.removeAlert()
-            return rc
+            if self.find("NotificationMiniCenter",onlyId=True) is None:
+                self.title("Connexion à OASIS", "usage du login et du mot de passe")
+                self.subtitle("Pour se connecter, on utilise l'identifiant et le mot de passe fourni par l'administrateur à la création du compte")
+                self.fill_form([username,password])
+                self.show("themeMainColor pull-right flipLink","En cas d'oublie, on peut toujours se faire renvoyer son mot de passe")
+                rc=self.click("SubmitLoginBtn")
+                self.subtitle("L'utilisateur est automatiquement reconnecté sur sa dernière page consulté")
+                self.removeAlert()
+                return rc
+            else:
+                self.log("Connexion déjà établie")
 
         return False
 

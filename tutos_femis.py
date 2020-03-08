@@ -15,14 +15,13 @@ class TutoFemis:
         self.f.close()
 
     def scenario1(self):
-        self.f.removeAlert()
         self.f.capture("mail_campagne", "Parcours d'une campagne de mail","Création des contacts, création de la campagne et expédition")
         self.f.login("j.lecanu", "azerty")
 
+        self.f.removeAlert()
+
         self.users.append(self.f.create_contact("CONTACT", "Paul", "Dudule", "paul.dudule@gmail.com", phone=digits(8, "06")))
         self.f.subtitle("Pour les besoins du parcours, on créé d'autres contacts")
-
-        self.f.stop()
 
         self.f.fastMode = True
         self.users.append(self.f.create_contact("CONTACT", "Sophie", "Dudule", "sophie.dudule@gmail.com", phone=digits(8, "06")))
