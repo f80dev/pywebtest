@@ -19,8 +19,9 @@ js/test.js,f\5\f5924db6f378900be2121c1bdabd814140490e68
 P
  testandcapture-508d678005de.json,1\c\1cc32b5e8a33232ffce8b10dc471f38490415437
 A
-mail_campagne.bat,b\5\b527dd62ac03e690fbef878c9cb512a301f2e8e2
-A
 js/removeCache.js,8\0\8047d58cd3fbe37e5ffcf37fdac0e81a0f61eedd
 @
 create_cours.bat,9\b\9bf10c2971d31ef84c1f89594f387245331c57d2
+:
+
+result.txt,b\d\bdd922bb216a40a75feefa8a8f6b904213bfef80

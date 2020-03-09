@@ -22,15 +22,15 @@ class FemisUser(Tools):
         self.click(self.find("button",0,zone))
 
 
-    def login(self,username,password):
+    def login(self,username,password,withTitle=True):
         if len(username)>0 and len(password)>0:
             if self.find("NotificationMiniCenter",onlyId=True) is None:
-                self.title("Connexion à OASIS", "usage du login et du mot de passe")
+                if withTitle:self.title("Connexion à OASIS", "usage du login et du mot de passe")
                 self.subtitle("Pour se connecter, on utilise l'identifiant et le mot de passe fourni par l'administrateur à la création du compte")
                 self.fill_form([username,password])
                 self.show("themeMainColor pull-right flipLink","En cas d'oublie, on peut toujours se faire renvoyer son mot de passe")
                 rc=self.click("SubmitLoginBtn")
-                self.subtitle("L'utilisateur est automatiquement reconnecté sur sa dernière page consulté")
+                self.subtitle("L'utilisateur est automatiquement reconnecté sur sa dernière page consultée")
                 self.removeAlert()
                 return rc
             else:
@@ -84,6 +84,11 @@ class FemisUser(Tools):
 
 
 
+    def create_stage(self, documents):
+        self.go("")
+
+
+
     def create_society(self,vals):
         if not self.nav("name=COMPANY"):
             self.click(self.find("MenuCOMPANY").element(tag_name="a"))
@@ -132,8 +137,13 @@ class FemisUser(Tools):
         self.show(zone,"Cette zone contient l'ensemble des types de contacts pouvant être insérés. On peut également ajouter les contacts d'autres campagnes")
 
         option=self.find("set_assoc_tab",index_type,zone)
-        if self.click(option,text="On choisit le type de contact à insérer dans la liste"):
-            self.create_link(id_zone="PropertyFields_CONTACT",lst=lst_contacts,text="Sélectionner des contacts à inclure dans la liste")
+        if self.click(option,text="On choisit un type de contact à insérer dans la liste proposée"):
+            self.create_link(id_zone="PropertyFields_CONTACT",
+                             lst=lst_contacts,
+                             text="Sélectionner des contacts à inclure dans la liste",
+                             show_result="L'ensemble des contacts inclus dans la liste est affiché immédiatement",
+                             description_zone="Cette zone va permettre de sélectionner les contacts à introduire dans la liste à construire")
+            self.subtitle("La liste de contact va pouvoir être utilisée pour le mailing")
             return name
         else:
             return None
@@ -169,7 +179,7 @@ class FemisUser(Tools):
 
 
 
-    def create_link(self, id_zone, lst, text,show_result=""):
+    def create_link(self, id_zone, lst, text,show_result="",description_zone=""):
         """
         Permet de créer des liens avec les entités référentes
         :param id_zone:
@@ -177,6 +187,7 @@ class FemisUser(Tools):
         :param text:
         :return:
         """
+        self.show("PropertyFields_CONTACT",description_zone)
         zone = self.find(id_zone, 0)
         button = self.find("button", 0, zone)
         self.click(button, text)

@@ -142,7 +142,7 @@ class Tools:
         return True
 
 
-    def capture(self,name,title="",subtitle=""):
+    def capture(self,filename="",title="",subtitle=""):
         """
 
         :param name:
@@ -151,16 +151,19 @@ class Tools:
         :return:
         """
 
-        if len(self.capture_file)>0:self.stop(10)
-        self.log("Démarage de la capture pour le fichier " + name)
+        if len(filename)==0:filename=title.replace(" ","_")
 
-        self.capture_file=name
+        if len(self.capture_file)>0:self.stop(10)
+        self.log("Démarage de la capture pour le fichier " + filename)
+
+        self.capture_file=filename
         with mss.mss() as self.sct:
             self.sct.compression_level = 2
 
         interval_en_minutes=1/(self.fps*60)
         self.scheduler.add_job(self.job_capture,"interval",minutes=interval_en_minutes,max_instances=1,id="capture_job")
         self.dtStartCapture = self.now()
+        self.fastMode=False
         if len(title)>0:
             self.title(title,subtitle=subtitle,background="black")
 
@@ -211,13 +214,14 @@ class Tools:
 
     def clavier(self,text,elt=None):
         if not elt is None:elt.focus()
-        dtStart= self.now()
         text=text.replace("{{ENTER}}",Keys.ENTER)
+
+        dtStart = self.now()
         for ch in text:
             self.wait(randint(0,100)/5000)
             self.browser.send_keys(ch)
 
-        self.add_sound("./clavier.wav", dtStart, (self.now() - dtStart), 0.6, 0, 0, 0)
+        self.add_sound("./clavier.wav", dtStart-0.02, (self.now() - dtStart), 0.6, 0, 0, 0)
 
 
 
@@ -235,11 +239,14 @@ class Tools:
             del indexes[0]
             if len(indexes)==0:indexes.append(1)
 
-        self.find(id="form-control fsInputFilter", index=0).focus()
+        zone_filter=self.find(id="form-control fsInputFilter", index=0)
+        self.show(zone_filter,"Afin de simplifier le choix dans la liste, il est possible de réduire le nombre d'élément via la zone de filtre")
+        zone_filter.focus()
         if len(filter) > 0:
             self.browser.send_keys(Keys.CONTROL+"a")
             self.browser.send_keys(filter)
             self.clavier("{{ENTER}}")
+            self.subtitle("L'application du filtre se fait au fur et à mesure de la frappe")
 
         l_index=list()
         for ch in indexes:
@@ -247,18 +254,19 @@ class Tools:
 
         l_index.sort()
 
-
+        self.subtitle("On peut sélectionner tous les éléments de la liste ou n'en prendre que certains grâce aux case à cocher")
         for i in range(max(l_index)+1):
             self.browser.send_keys(Keys.TAB)
             if i in l_index:self.browser.send_keys(Keys.SPACE)
 
-        self.click_at(50, 50)
+        self.click_at(50, 50,"Pour valider le choix, il suffit de cliquer en dehors de la liste")
 
 
 
 
-    def click_at(self,x,y):
+    def click_at(self,x,y,subtitle=""):
         pyautogui.click(self.browser.window().position.x + x,self.browser.window().position.y+100+y)
+        self.subtitle(subtitle)
 
 
     def fill_form_old(self, zone, vals, submit):
@@ -395,7 +403,7 @@ class Tools:
         delay=getDuration(output_filename)
 
         timecode=int((self.now()-self.dtStartCapture)*1000)
-        code="\n#Insertion de '"+text+'" de '+str(timecode/1000)+" sur "+str(delay)+" secondes\n"
+        code="\necho(\"Insertion de '"+text+'" de '+str(timecode/1000)+" sur "+str(delay)+" secondes\")\n"
         if "input.wav" not in self.videoBatchFile:
             code = code+"\ndel input.wav\nffmpeg -f lavfi -i anullsrc=channel_layout=1:sample_rate=48000 -t " + str(timecode/1000) + " input.wav\n"
 
@@ -436,7 +444,7 @@ class Tools:
         sDuration = "-t " + str(durationInSec)
         if durationInSec == 0:sDuration=""
 
-        code="\n#Ajout de "+file+" à la position "+str(timecode)+"\n"
+        code="\necho 'Ajout de "+file+" à la position "+str(timecode)+"'\n"
         code=code+"\ndel output.wav\ncall ffmpeg -y "+sOffset+" -i "+file+" "+sDuration+" -c copy output_insert.wav\n"
         code=code+"call ffmpeg -y -i input.wav -i output_insert.wav -filter_complex \"[0:a]volume=1[a0];[1:a]adelay="
         code=code+str(timecode)+"|"+str(timecode)+",volume="+str(volume)+"[a1];[a0][a1]amix=inputs=2,volume=2[a]\" -map \"[a]\" output_temp.wav\n"
@@ -457,7 +465,7 @@ class Tools:
 
 
 
-    def subtitle(self,text,position="90vh"):
+    def subtitle(self,text,position="90vh",async=False):
         delay=0
         if not text in self.histo:
             self.log(text)
@@ -465,7 +473,7 @@ class Tools:
             if position=="top":position="10vh"
             delay = self.speak(text)
             self.execute("showSubtitle",text,delay*1000,"font-weight:bolder;font-size:x-large;background-color:white;",position)
-            self.wait(delay)
+            if not async:self.wait(delay)
         return delay
 
 
@@ -480,10 +488,10 @@ class Tools:
         :return:
         """
         delay=0
-        if not self.fastMode:
+        if not self.fastMode and len(text)>0:
             elt=self.find(id,0)
             if not elt is None and not text in self.histo:
-                delay=self.subtitle(text)
+                delay=self.subtitle(text,async=True)
                 self.execute("showElement", elt.location.x,elt.location.y,elt.size.width,elt.size.height, "https://moziru.com/images/drawn-number-circle-png-10.png",delay*1000)
                 self.wait(delay)
         return delay
@@ -506,8 +514,8 @@ class Tools:
                 self.wait(0.5)
 
             self.histo.append(title)
-            delay=self.speak("<speak>"+title+".<break time=\"1s\"/>"+subtitle+"</speak>")
-            self.execute("showTitle",title,subtitle,delay*1000,"color:white")
+            delay=self.speak("<speak>"+title+".<break time=\"0.2s\"/>"+subtitle+"</speak>")
+            self.execute("showTitle",title,subtitle,delay*1000+500,"color:white")
             self.wait(delay-0.5)
             if len(background) > 0:
                 self.removeCache(id_cache)
