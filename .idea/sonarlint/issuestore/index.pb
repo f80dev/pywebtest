@@ -25,3 +25,5 @@ A
 :
 
 result.txt,b\d\bdd922bb216a40a75feefa8a8f6b904213bfef80
+A
+mail_campagne.bat,b\5\b527dd62ac03e690fbef878c9cb512a301f2e8e2
