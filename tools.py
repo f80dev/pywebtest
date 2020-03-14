@@ -63,6 +63,9 @@ class Tools:
         return True
 
 
+    def scroll_down(self):
+        self.browser.send_keys(Keys.PAGE_DOWN)
+
     def getDelay(self,text: str):
         if self.fastMode:
             return 0
@@ -104,17 +107,30 @@ class Tools:
             sleep(nSecondes)
 
 
+    def pere(self,elt):
+        elt=self.find(elt)
+        if not elt is None:return elt.element(xpath="..")
+        return None
+
+
     def find(self,id,index=0,pere=None,onlyId=False):
         if pere is None:pere=self.browser
 
         if type(id)==str:
             obj=pere.element(id=id)
-            if not obj.exist:
+            if not obj._located or not obj.exist:
                 if onlyId:return None
                 objs=pere.elements(name=id)
                 if len(objs) == 0: objs = pere.elements(tag_name=id)
                 if len(objs)==0:objs=pere.elements(class_name=id)
-                if index<=len(objs):obj=objs[index]
+
+                if type(index)==str:
+                    #On cherche par rapport au contenu
+                    for obj in objs:
+                        if obj.text==index:
+                            return obj
+                else:
+                    if index<=len(objs):obj=objs[index]
 
             if not obj.exist:return None
             return obj
@@ -213,7 +229,10 @@ class Tools:
 
 
     def clavier(self,text,elt=None):
-        if not elt is None:elt.focus()
+        if len(text)==0:return False
+        if not elt is None:
+            if type(elt)==str:elt=self.find(elt,0)
+            elt.focus()
         text=text.replace("{{ENTER}}",Keys.ENTER)
 
         dtStart = self.now()
@@ -222,6 +241,7 @@ class Tools:
             self.browser.send_keys(ch)
 
         self.add_sound("./clavier.wav", dtStart-0.02, (self.now() - dtStart), 0.6, 0, 0, 0)
+        return True
 
 
 
@@ -543,9 +563,17 @@ class Tools:
 
 
     def select(self, elt, value):
-        obj=self.browser.select(id=elt)
-        if not obj is None:
-            obj.select_value(value)
+        if type(elt)==str:
+            obj=self.browser.select(id=elt)
+        else:
+            obj=elt
+
+        if obj.exists:
+            if type(value)==int:
+                for i in range(value):
+                    obj.send_keys(Keys.ARROW_DOWN)
+            else:
+                obj.select(value)
             return True
         return False
 

@@ -18,8 +18,14 @@ class TutoFemis:
         self.f.capture(title="Création d'un contact externe")
         self.f.login("j.lecanu", "azerty")
         self.users.append(
-            self.f.create_contact("CONTACT", "Paul", "Dudule", "paul.dudule@gmail.com", phone=digits(8, "06")))
+            self.f.create_contact("CONTACT", prenom="Paul", nom="Dudule", email="paul.dudule@gmail.com", phone=digits(8, "06")))
         self.f.stop()
+
+
+    def scenario_build(self):
+        self.f.login("j.lecanu","azerty")
+        self.f.create_contact("STUDENT_FI",prenom="Paul",nom="Dudule",email="paul.dudule@gmail.com")
+
 
     def scenario_mailing(self):
         self.f.subtitle("Pour les besoins du parcours, on créé d'autres contacts")

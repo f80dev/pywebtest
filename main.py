@@ -32,7 +32,7 @@ from utils import tirage, words, digits
 
 
 tuto=TutoFemis()
-tuto.scenario_mailing()
+tuto.scenario_build()
 
 
 

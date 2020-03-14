@@ -99,13 +99,35 @@ class FemisUser(Tools):
 
         self.fill_form("tab-content",vals,"btn btn-lg btn-danger floating_toolbar")
 
-    def create_contact(self, type,prenom,nom,email,subtitle="",phone="",address=""):
+    def create_contact(self, type="STUDENT_FI",gender=1,prenom="Paul",nom="Dudule",
+                       email="paul.dudule@gmail.com",
+                       birthdate="04/02/1971",country=3,nationality=10,
+                       subtitle="",phone="",address="",password=""):
         self.title("Création de contact",subtitle=subtitle)
         self.subtitle("On choisi le type de contacte dans le menu UTILISATEUR")
         self.go("#type=INSERT&name="+type)
         self.subtitle("On va renseigner les champs obligatoires Nom, Prénom et adresse Email")
-        self.fill_form(["",nom,"",prenom,"","","",email,"",phone,address],first="GENDER",validate="btn btn-lg btn-danger floating_toolbar")
+        if len(password)==0:
+            self.click("generatePassword btn btn-primary")
+        else:
+            self.clavier(password,"PASSWORD")
+
+        self.select(self.find("GENDER",0), gender)
+        self.clavier(nom, "LNAME")
+        self.clavier(address,"ADDRESS")
+        self.clavier(prenom,"FNAME")
+        self.clavier(email,"MAIL")
+        self.clavier(phone,"PHONE")
+        self.select(self.find("GENDER",0), gender)
+
+        if len(birthdate)>0:
+            self.scroll_down()
+            zone=self.pere(self.find("label","DATE DE NAISSANCE"))
+            self.fill_form([birthdate,country,nationality],first=self.find("input",0,zone))
+
+        #self.fill_form(["",nom,"",prenom,"","","",email,"",phone,address],first="GENDER",validate="btn btn-lg btn-danger floating_toolbar")
         self.subtitle("La validation entraine la création du contact",position="top")
+        self.click("btn btn-lg btn-danger floating_toolbar",0)
         self.waitForURL("&code=")
         rc= extract(self.browser.url,"&code=","&")
         return rc

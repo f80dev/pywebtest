@@ -1,6 +1,6 @@
 
-opython:S107f"QMethod "create_contact" has 8 parameters, which is greater than the 7 authorized.(¤‘ï¹8Œë•³Š.
 spython:S117"URename this parameter "withTitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(ÔÔÂã8¯Ÿ²ö‹.
+opython:S107f"QMethod "create_contact" has 8 parameters, which is greater than the 7 authorized.(¤‘ï¹8Œë•³Š.
+upython:S107É"QMethod "create_mailing" has 9 parameters, which is greater than the 7 authorized.(ˆ×ÙŒúÿÿÿÿ8ĞÂ†÷‹.
 wpython:S117	"TRename this parameter "fastMode" to match the regular expression ^[_a-z][a-z0-9_]*$.(øÈ ûÿÿÿÿ8í÷¼ˆ.
 Jpython:S1481©"%Remove the unused local variable "i".(‡Â˜Èùÿÿÿÿ8óÏ±‡‹.
-upython:S107É"QMethod "create_mailing" has 9 parameters, which is greater than the 7 authorized.(ˆ×ÙŒúÿÿÿÿ8ĞÂ†÷‹.
