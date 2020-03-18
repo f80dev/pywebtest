@@ -18,19 +18,26 @@ class FemisUser(Tools):
 
 
     def removeAlert(self):
-        zone=self.find("NotInProdAlert")
-        self.click(self.find("button",0,zone))
+        zone=self.find("alert alert-danger alert-dismissible navbar-fixed-bottom")
+        if not zone is None:
+            self.click(self.find("button",0,zone))
+            return True
+        else:
+            return False
 
 
-    def login(self,username,password,withTitle=True):
+    def login(self,username,password,withTitle=True,withSubtitle=True):
         if len(username)>0 and len(password)>0:
             if self.find("NotificationMiniCenter",onlyId=True) is None:
                 if withTitle:self.title("Connexion à OASIS", "usage du login et du mot de passe")
-                self.subtitle("Pour se connecter, on utilise l'identifiant et le mot de passe fourni par l'administrateur à la création du compte")
+                if withSubtitle:self.subtitle("Pour se connecter, on utilise l'identifiant et le mot de passe fourni par l'administrateur à la création du compte")
                 self.fill_form([username,password])
                 self.show("themeMainColor pull-right flipLink","En cas d'oublie, on peut toujours se faire renvoyer son mot de passe")
-                rc=self.click("SubmitLoginBtn")
-                self.subtitle("L'utilisateur est automatiquement reconnecté sur sa dernière page consultée")
+                rc=self.click("btn btn-primary btn-block btn-lg",0)
+                if withSubtitle:
+                    self.subtitle("L'utilisateur est automatiquement reconnecté sur sa dernière page consultée")
+                else:
+                    self.wait(1)
                 self.removeAlert()
                 return rc
             else:
@@ -84,8 +91,22 @@ class FemisUser(Tools):
 
 
 
-    def create_stage(self, documents):
-        self.go("")
+    def create_stage(self, documents,societe,lieux,signataire,sujet):
+        self.go("#type=INSERT&name=INTERNSHIP")
+        self.fill_form(documents,first="STUDENT")
+        self.click("ATabLocation",text="Il est nécéssaire de préciser le lieu du stage")
+        self.click("fsContainer",0)
+        self.select_in_list(societe,societe,multi=False)
+        self.fill_form(lieux,first="INTERNSHIP_BUSINESS_ADDRESS-1-ADDRESS")
+        self.fill_form(signataire,first="CIE_SIGNATORY_LNAME")
+        self.click("ATabSubject",text="Ici, on va préciser le sujet du stage et donner des informations sur le tuteur")
+        self.fill_form(sujet,first="SUBJECT")
+        self.click("ATabDates",text="Cette zone va permettre de préciser la quantité d'heure par semaine")
+        self.fill_form([1,"3 heures"],first="HOURS_PER_WEEK")
+        self.subtitle("La saisie terminée, on valide le stage")
+        self.click("btn btn-lg btn-danger floating_toolbar",0)
+        return True
+
 
 
 
@@ -102,21 +123,20 @@ class FemisUser(Tools):
     def create_contact(self, type="STUDENT_FI",gender=1,prenom="Paul",nom="Dudule",
                        email="paul.dudule@gmail.com",
                        birthdate="04/02/1971",country=3,nationality=10,
-                       subtitle="",phone="",address="",password=""):
-        self.title("Création de contact",subtitle=subtitle)
-        self.subtitle("On choisi le type de contacte dans le menu UTILISATEUR")
+                       subtitle="",phone="",address="",password="",complements=dict()):
         self.go("#type=INSERT&name="+type)
-        self.subtitle("On va renseigner les champs obligatoires Nom, Prénom et adresse Email")
+        self.subtitle("Les champs obligatoires sont marqués d'une étoile rouge")
+        self.subtitle("L'utilisateur peut choisir le mot de passe de l'étudiant ou demandé au système de le générer aléatoirement")
         if len(password)==0:
             self.click("generatePassword btn btn-primary")
         else:
             self.clavier(password,"PASSWORD")
 
         self.select(self.find("GENDER",0), gender)
-        self.clavier(nom, "LNAME")
-        self.clavier(address,"ADDRESS")
-        self.clavier(prenom,"FNAME")
-        self.clavier(email,"MAIL")
+        self.clavier(nom, "LNAME",wait=0.2)
+        self.clavier(address,"ADDRESS",wait=0.2)
+        self.clavier(prenom,"FNAME",wait=0.2)
+        self.clavier(email,"MAIL","L'email de l'étudiant sera utilisé pour toute la communication avec l'école")
         self.clavier(phone,"PHONE")
         self.select(self.find("GENDER",0), gender)
 
@@ -124,6 +144,9 @@ class FemisUser(Tools):
             self.scroll_down()
             zone=self.pere(self.find("label","DATE DE NAISSANCE"))
             self.fill_form([birthdate,country,nationality],first=self.find("input",0,zone))
+
+        for k in complements.keys():
+            self.clavier(complements[k],k)
 
         #self.fill_form(["",nom,"",prenom,"","","",email,"",phone,address],first="GENDER",validate="btn btn-lg btn-danger floating_toolbar")
         self.subtitle("La validation entraine la création du contact",position="top")
@@ -244,6 +267,26 @@ class FemisUser(Tools):
     def openSideMenu(self, pave, option):
         zone = self.find("side_content-links", pave, self.find("SideContent"))
         self.click(self.find("a", option, zone))
+
+    def fill_sacre_form(self,delayInSecBetweenScreen):
+        self.go("#codepage=CDT___INSTRUCTIONS_FI")
+        self.wait(delayInSecBetweenScreen)
+        self.go("#codepage=CDT___CIVILITY_FI",subtitle="Le candidat doit renseigner l'ensemble des paramètres liés à la civilité")
+        self.wait(delayInSecBetweenScreen)
+        self.scroll_down()
+        self.wait(delayInSecBetweenScreen/2)
+
+        self.go("#codepage=CDT___WISHES_FI",subtitle="Il précise ensuite quelles sont les aides dont il dispose")
+        self.wait(delayInSecBetweenScreen)
+        self.go("#codepage=CDT___STUDIES_FI",subtitle="Quelles sont les études poursuivi jusqu'à maintenant")
+        self.wait(delayInSecBetweenScreen)
+        self.go("#codepage=CDT___ACTIVITIES_FI",subtitle="Puis ses productions et publications")
+        self.wait(delayInSecBetweenScreen)
+        self.go("#codepage=CDT___FOLDER_FI",subtitle="Enfin il transfmet à l'école les différents documents nécéssaires à la validation du dossier")
+        self.wait(delayInSecBetweenScreen)
+
+
+
 
 
 

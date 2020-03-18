@@ -23,8 +23,31 @@ class TutoFemis:
 
 
     def scenario_build(self):
-        self.f.login("j.lecanu","azerty")
-        self.f.create_contact("STUDENT_FI",prenom="Paul",nom="Dudule",email="paul.dudule@gmail.com")
+        self.f.capture(title="Création d'un étudiant")
+        self.f.login("j.lecanu", "azerty",withTitle=False)
+        #self.f.create_contact("STUDENT_FI",prenom="Paul",nom="Dudule",email="paul.dudule@gmail.com",complements={"PROMO":"ma promotion"})
+        self.f.stop(title="Enregistrement du compte",subtitle="Après validation, le compte étudiant est créé et disponible dans le CRM")
+
+
+    def scenario_inscription_sacre(self,firstname,lastname,email,password):
+        self.f.capture(title="Inscription au parcours SACRe",subtitle="Connexion pour vérification de l'email")
+        self.f.go("https://femis.scolasis.com?apcafi=7")
+        self.f.subtitle("La première étape consiste à s'inscrire avec son adresse mail")
+        self.f.fill_form([firstname,lastname,email,password,password],first="fname",validate="btn btn-primary btn-block btn-lg js-btnSubmit")
+        self.f.subtitle("La validation entraîne la vérification de l'email pour envoi d'un lien à ouvrir")
+        self.f.click("btn btn-primary btn-close",0)
+        self.f.stop(title="Parcours d'inscription")
+
+
+    def scenario_fill_form(self,login:str,password:str):
+        self.f.go("https://femis.scolasis.com/")
+        self.f.capture(title="Remplissage du formulaire d'inscription SACRe")
+        self.f.subtitle("A tout moment, le candidat peut se connecter pour commencer ou compléter son dossier")
+        self.f.login(login, password,withTitle=False,withSubtitle=False)
+        self.f.subtitle("Après connexion il retrouve son dossier tel qu'il l'avait laissé")
+        self.f.fill_sacre_form(2)
+        self.f.stop("L'inscription prend fin après paiement et confirmation")
+
 
 
     def scenario_mailing(self):
@@ -52,9 +75,21 @@ class TutoFemis:
 
 
     def scenario_creation_de_stage(self):
-        self.f.capture(title="Création d'un stage")
         self.f.login("j.lecanu", "azerty")
-        self.f.create_stage([1, "fonction de stagiaire"])
+        self.f.capture(title="Création d'un stage")
+        #self.f.create_contact(prenom="Paulo",nom="Dudule",email="paul.dudule@gmail.com")
+        if self.f.create_stage(
+            [1, "fonction de stagiaire"],
+            "BAXTER",
+            ["12 rue martel","","75010","Paris"],
+            ["Paul","Dudule","Chef","0625252525"],
+            ["sujet du stage"]):
+            self.f.go("#name=INTERNSHIP&type=LIST")
+            self.f.show("hover detail",text="Après validation le stage apparait dans la liste des stages comme une liaison entre un étudiant et une société")
+
+        self.f.stop(title="Fin")
+        return True
+
 
 
 

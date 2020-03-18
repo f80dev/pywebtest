@@ -1,9 +1,11 @@
+import subprocess
 from datetime import datetime
 from os.path import exists
 from random import randint, seed, random
 from time import sleep
 
 import pyautogui
+import unidecode as unidecode
 from google.cloud import texttospeech
 from nerodia.browser import Browser
 
@@ -16,6 +18,7 @@ import numpy
 from PIL import Image
 from apscheduler.schedulers.background import BackgroundScheduler
 
+from definitions import SUP_DELAY_SPEAK
 from utils import getDuration
 
 
@@ -55,11 +58,14 @@ class Tools:
         self.init_zone_capture()
 
 
-    def go(self,url:str):
+    def go(self,url:str,subtitle=""):
         if not url.startswith("http"):url=self.browser.url.split(".com")[0]+".com/"+url
         if self.browser.url==url:return True
         self.browser.goto(url)
-        self.wait(1)
+        if len(subtitle)==0:
+            self.wait(1)
+        else:
+            self.subtitle(subtitle)
         return True
 
 
@@ -118,7 +124,7 @@ class Tools:
 
         if type(id)==str:
             obj=pere.element(id=id)
-            if not obj._located or not obj.exist:
+            if not obj.exist:
                 if onlyId:return None
                 objs=pere.elements(name=id)
                 if len(objs) == 0: objs = pere.elements(tag_name=id)
@@ -127,7 +133,7 @@ class Tools:
                 if type(index)==str:
                     #On cherche par rapport au contenu
                     for obj in objs:
-                        if obj.text==index:
+                        if str(obj.text).startswith(index):
                             return obj
                 else:
                     if index<=len(objs):obj=objs[index]
@@ -167,7 +173,9 @@ class Tools:
         :return:
         """
 
-        if len(filename)==0:filename=title.replace(" ","_")
+        if len(filename)==0:
+            filename=unidecode.unidecode(title.replace(" ","_").replace("'","_"))
+            self.log("Génération du nom de fichier depuis le titre : "+filename)
 
         if len(self.capture_file)>0:self.stop(10)
         self.log("Démarage de la capture pour le fichier " + filename)
@@ -228,8 +236,9 @@ class Tools:
                 return self.click(validate,0)
 
 
-    def clavier(self,text,elt=None):
+    def clavier(self,text,elt=None,subtitle="",waitInSec=0):
         if len(text)==0:return False
+        if len(subtitle)>0:self.show(elt,subtitle)
         if not elt is None:
             if type(elt)==str:elt=self.find(elt,0)
             elt.focus()
@@ -240,24 +249,26 @@ class Tools:
             self.wait(randint(0,100)/5000)
             self.browser.send_keys(ch)
 
-        self.add_sound("./clavier.wav", dtStart-0.02, (self.now() - dtStart), 0.6, 0, 0, 0)
+        self.add_sound("./clavier.wav",  (self.now() - dtStart), 0.6, 0, 0, 0)
+        self.wait(waitInSec)
+
         return True
 
 
 
-    def select_in_list(self,indexes,filter=""):
+    def select_in_list(self,indexes,filter="",multi=True):
         """
 
         :param index:
         :return:
         """
 
-        if type(indexes)!=list:indexes=list(indexes)
+        if type(indexes)!=list:indexes=[indexes]
 
-        if type(indexes[0])==str:
-            filter=indexes[0]
-            del indexes[0]
-            if len(indexes)==0:indexes.append(1)
+        # if type(indexes[0])==str:
+        #     filter=indexes[0]
+        #     del indexes[0]
+        #     if len(indexes)==0:indexes.append(1)
 
         zone_filter=self.find(id="form-control fsInputFilter", index=0)
         self.show(zone_filter,"Afin de simplifier le choix dans la liste, il est possible de réduire le nombre d'élément via la zone de filtre")
@@ -265,21 +276,25 @@ class Tools:
         if len(filter) > 0:
             self.browser.send_keys(Keys.CONTROL+"a")
             self.browser.send_keys(filter)
-            self.clavier("{{ENTER}}")
+            if multi:self.clavier("{{ENTER}}")
             self.subtitle("L'application du filtre se fait au fur et à mesure de la frappe")
 
-        l_index=list()
-        for ch in indexes:
-            l_index.append(int(ch))
+        if multi:
+            l_index=list()
+            for ch in indexes:
+                l_index.append(int(ch))
 
-        l_index.sort()
+            l_index.sort()
 
-        self.subtitle("On peut sélectionner tous les éléments de la liste ou n'en prendre que certains grâce aux case à cocher")
-        for i in range(max(l_index)+1):
-            self.browser.send_keys(Keys.TAB)
-            if i in l_index:self.browser.send_keys(Keys.SPACE)
+            self.subtitle("On peut sélectionner tous les éléments de la liste ou n'en prendre que certains grâce aux case à cocher")
+            for i in range(max(l_index)+1):
+                self.browser.send_keys(Keys.TAB)
+                if i in l_index:self.browser.send_keys(Keys.SPACE)
 
-        self.click_at(50, 50,"Pour valider le choix, il suffit de cliquer en dehors de la liste")
+            self.click_at(50, 50,"Pour valider le choix, il suffit de cliquer en dehors de la liste")
+        else:
+            elt=self.find("label",indexes[0])
+            self.click(elt)
 
 
 
@@ -316,8 +331,9 @@ class Tools:
 
 
 
-    def stop(self,offset=0):
+    def stop(self,title="",subtitle="",offset=0):
         if len(self.frames)==0:return False
+        self.title(title,subtitle=subtitle)
         self.log("Fin de la capture")
         self.scheduler.remove_job(job_id="capture_job")
         video = cv2.VideoWriter('./'+self.capture_file+'.avi',
@@ -339,10 +355,14 @@ class Tools:
         #format = self.videoBatchFile.substring(videoFile.lastIndexOf(".") + 1).toLowerCase().trim();
         #new_name = self.videoBatchFile.replace("tags", tags.replace("#", "")).replaceAll(" ", "_").replaceAll("_temp", "");
 
-        self.videoBatchFile =self.videoBatchFile + "\ndel output.mkv\nffmpeg -i \"" + self.capture_file+".avi" + "\" -i input.wav -c copy output.mkv\n"
+        self.videoBatchFile =self.videoBatchFile + "\ndel \""+self.capture_file+".mkv\"\nffmpeg -i \"" + self.capture_file+".avi" + "\" -i input.wav -c copy "+self.capture_file+".mkv\n"
+        #TODO le lancement de la vidéo ne fonctionne pas
+        #self.videoBatchFile = self.videoBatchFile +"\ncall \""+self.capture_file+".mkv\""
 
         with open(self.capture_file+".bat", "w") as text_file:
             text_file.write(self.videoBatchFile)
+
+        subprocess.run([self.capture_file+".bat"])
 
         self.frames=list()
         self.histo=list()
@@ -400,27 +420,28 @@ class Tools:
         if len(output_filename) == 0:
             output_filename = self.getSoundFile(text)
 
+        key_file="testandcapture-508d678005de.json"
         if not exists(output_filename):
             if self.client is None:
-                self.client = texttospeech.TextToSpeechClient().from_service_account_file("testandcapture-508d678005de.json")
+                self.client = texttospeech.TextToSpeechClient().from_service_account_file(key_file)
 
             synthesis_input = texttospeech.types.SynthesisInput(ssml=text)
-            voice = texttospeech.types.VoiceSelectionParams(
-                language_code=lang,
-                ssml_gender=texttospeech.enums.SsmlVoiceGender.NEUTRAL
-            )
+            voice = texttospeech.types.VoiceSelectionParams(name="fr-FR-Wavenet-A",language_code=lang,ssml_gender=texttospeech.enums.SsmlVoiceGender.FEMALE)
+            #
             audio_config = texttospeech.types.AudioConfig(audio_encoding=texttospeech.enums.AudioEncoding.OGG_OPUS)
 
-            self.log("Vocalisation de la phrase " + text)
-            response = self.client.synthesize_speech(synthesis_input, voice, audio_config)
+            try:
+                self.log("Vocalisation de la phrase " + text)
+                response = self.client.synthesize_speech(synthesis_input, voice, audio_config)
+                # The response's audio_content is binary.
+                with open(output_filename, 'wb') as out:
+                    # Write the response to the output file.
+                    out.write(response.audio_content)
+                    out.close()
+            except Exception as inst:
+                self.log("Probléme de génération du fichier "+str(inst.args)+" avec "+key_file+" comme fichier de credential")
 
-            # The response's audio_content is binary.
-            with open(output_filename, 'wb') as out:
-                # Write the response to the output file.
-                out.write(response.audio_content)
-                out.close()
-
-        delay=getDuration(output_filename)
+        delay=getDuration(output_filename)+SUP_DELAY_SPEAK
 
         timecode=int((self.now()-self.dtStartCapture)*1000)
         code="\necho(\"Insertion de '"+text+'" de '+str(timecode/1000)+" sur "+str(delay)+" secondes\")\n"
@@ -442,7 +463,7 @@ class Tools:
 
 
 
-    def add_sound(self,file, startInMilliseconds, durationInSec, volume, offsetInSec, start_fadeout,delay_fadeout):
+    def add_sound(self,file,  durationInSec, volume, offsetInSec, start_fadeout,delay_fadeout):
         """
         Ajout d'un effet sonor
         :param file:
@@ -456,7 +477,7 @@ class Tools:
         """
         if self.dtStartCapture is None:return False
 
-        timecode=int((self.now()-self.dtStartCapture)*1000)
+        timecode=int((self.now()-self.dtStartCapture)*1000)-300
 
         sOffset = "-ss " + str(offsetInSec)
         if offsetInSec == 0:sOffset="";
@@ -534,9 +555,14 @@ class Tools:
                 self.wait(0.5)
 
             self.histo.append(title)
-            delay=self.speak("<speak>"+title+".<break time=\"0.2s\"/>"+subtitle+"</speak>")
+
+            to_speak=title
+            if len(subtitle)>0:to_speak=to_speak+".<break time=\"0.2s\"/>"+subtitle
+
+            delay=self.speak("<speak>"+to_speak+"</speak>")
             self.execute("showTitle",title,subtitle,delay*1000+500,"color:white")
-            self.wait(delay-0.5)
+            self.wait(delay-1)
+
             if len(background) > 0:
                 self.removeCache(id_cache)
                 self.wait(0.5)
@@ -568,6 +594,7 @@ class Tools:
         else:
             obj=elt
 
+        if obj is None:return False
         if obj.exists:
             if type(value)==int:
                 for i in range(value):
@@ -607,7 +634,7 @@ class Tools:
 
 
     def add_click(self):
-        self.add_sound("./click.mp3", self.now(), 0.2, 0.6, 0, 0, 0)
+        self.add_sound("./click.mp3", 0.2, 0.6, 0, 0, 0)
 
     def focus(self, node):
         if node is None:return False

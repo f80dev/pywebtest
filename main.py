@@ -32,7 +32,11 @@ from utils import tirage, words, digits
 
 
 tuto=TutoFemis()
-tuto.scenario_build()
+#tuto.scenario_inscription_sacre("roger","legumes","roger.legumes@gmail.com","Hh4271!!")
+#tuto.scenario_fill_form("rlegumes","Hh4271!!")
+#tuto.scenario_creation_de_stage()
+tuto.scenario_creation_de_stage()
+tuto.quit()
 
 
 

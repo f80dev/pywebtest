@@ -1,3 +1,4 @@
+import os
 from random import randint
 import nltk
 from tinytag import TinyTag
@@ -23,8 +24,11 @@ def words(n_words=10):
 
 
 def getDuration(filename):
-    tag = TinyTag.get(filename)
-    return tag.duration/2
+    if os.path.exists(filename):
+        tag = TinyTag.get(filename)
+        return tag.duration/2
+    else:
+        return 0
 
 
 
