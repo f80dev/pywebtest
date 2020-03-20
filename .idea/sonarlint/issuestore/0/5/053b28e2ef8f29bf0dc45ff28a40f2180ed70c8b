@@ -1,8 +1,9 @@
 
-upython:S107u"RMethod "create_contact" has 14 parameters, which is greater than the 7 authorized.(ºÓˆ™üÿÿÿÿ8²¢ïå.
-upython:S107ğ"QMethod "create_mailing" has 9 parameters, which is greater than the 7 authorized.(ˆ×ÙŒúÿÿÿÿ8ŸÀ­å.
-spython:S117"URename this parameter "withTitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(¶›óô8¯Ÿ²ö‹.
-vpython:S117"XRename this parameter "withSubtitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(¶›óô8Ø¨àÕ.
-wpython:S117	"TRename this parameter "fastMode" to match the regular expression ^[_a-z][a-z0-9_]*$.(øÈ ûÿÿÿÿ8í÷¼ˆ.
-Jpython:S1481Ğ"%Remove the unused local variable "i".(‡Â˜Èùÿÿÿÿ8ŸÀ­å.
-‡python:S117‰"cRename this parameter "delayInSecBetweenScreen" to match the regular expression ^[_a-z][a-z0-9_]*$.(×§ÊÅøÿÿÿÿ8ŸÀ­å.
+rpython:S107d"OMethod "create_stage" has 8 parameters, which is greater than the 7 authorized.(åàİüÿÿÿÿÿ8œÑòö.
+Cpython:S125’"Remove this commented out code.(ÎìÅ¿ûÿÿÿÿ8ØÙÆš.
+wpython:S117	"TRename this parameter "fastMode" to match the regular expression ^[_a-z][a-z0-9_]*$.(·©áÔûÿÿÿÿ8í÷¼ˆ.
+vpython:S117#"XRename this parameter "withSubtitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(¶›óô8Ø¨àÕ.
+Jpython:S1481Ú"%Remove the unused local variable "i".(‡Â˜Èùÿÿÿÿ8ŸÀ­å.
+spython:S117#"URename this parameter "withTitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(¶›óô8¯Ÿ²ö‹.
+‡python:S117“"cRename this parameter "delayInSecBetweenScreen" to match the regular expression ^[_a-z][a-z0-9_]*$.(×§ÊÅøÿÿÿÿ8ŸÀ­å.
+upython:S107ú"QMethod "create_mailing" has 9 parameters, which is greater than the 7 authorized.(ˆ×ÙŒúÿÿÿÿ8ŸÀ­å.

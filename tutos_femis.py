@@ -5,8 +5,8 @@ from utils import words, digits
 class TutoFemis:
     users = list()
 
-    def __init__(self):
-        self.f = FemisUser(fastMode=False)
+    def __init__(self,prod=False):
+        self.f = FemisUser(prod=prod,fastMode=False)
 
 
     def quit(self):
@@ -17,8 +17,7 @@ class TutoFemis:
     def scenario_create_user(self):
         self.f.capture(title="Création d'un contact externe")
         self.f.login("j.lecanu", "azerty")
-        self.users.append(
-            self.f.create_contact("CONTACT", prenom="Paul", nom="Dudule", email="paul.dudule@gmail.com", phone=digits(8, "06")))
+        #self.users.append(self.f.create_contact("CONTACT", prenom="Paul", nom="Dudule", email="paul.dudule@gmail.com", phone=digits(8, "06")))
         self.f.stop()
 
 
@@ -31,7 +30,7 @@ class TutoFemis:
 
     def scenario_inscription_sacre(self,firstname,lastname,email,password):
         self.f.capture(title="Inscription au parcours SACRe",subtitle="Connexion pour vérification de l'email")
-        self.f.go("https://femis.scolasis.com?apcafi=7")
+        self.f.go(self.f.domain+"?apcafi=7")
         self.f.subtitle("La première étape consiste à s'inscrire avec son adresse mail")
         self.f.fill_form([firstname,lastname,email,password,password],first="fname",validate="btn btn-primary btn-block btn-lg js-btnSubmit")
         self.f.subtitle("La validation entraîne la vérification de l'email pour envoi d'un lien à ouvrir")
@@ -40,7 +39,7 @@ class TutoFemis:
 
 
     def scenario_fill_form(self,login:str,password:str):
-        self.f.go("https://femis.scolasis.com/")
+        self.f.go(self.f.domain)
         self.f.capture(title="Remplissage du formulaire d'inscription SACRe")
         self.f.subtitle("A tout moment, le candidat peut se connecter pour commencer ou compléter son dossier")
         self.f.login(login, password,withTitle=False,withSubtitle=False)
@@ -49,6 +48,18 @@ class TutoFemis:
         self.f.stop("L'inscription prend fin après paiement et confirmation")
 
 
+    def create_profil(self):
+        self.f.fastMode = True
+        self.users.append(
+            self.f.create_contact("CONTACT", [1,"Dudule","04/02/1971","Sophie","", "","","sophie.dudule@gmail.com",digits(8, "06")]))
+        self.users.append(
+            self.f.create_contact("CONTACT",[0,"Dudule","04/02/1971","Roger","", "","","roger.legumes@gmail.com",digits(8, "06")]))
+        self.users.append(
+            self.f.create_contact("CONTACT", [0,"Dudule","04/02/1971","Jerome","", "","","jerome.banane@f80.fr",digits(8, "06")]))
+        self.users.append(
+            self.f.create_contact("CONTACT", [0,"Dudule","04/02/1971","Didier","", "","","didier.canard@f80.fr",digits(8, "06")]))
+        self.f.fastMode = False
+
 
     def scenario_mailing(self):
         self.f.subtitle("Pour les besoins du parcours, on créé d'autres contacts")
@@ -56,38 +67,34 @@ class TutoFemis:
         self.f.capture("mail_campagne", "Parcours d'une campagne de mail",
                        "Création des contacts, création de la campagne et expédition")
 
-        # self.f.fastMode = True
-        # self.users.append(self.f.create_contact("CONTACT", "Sophie", "Dudule", "sophie.dudule@gmail.com", phone=digits(8, "06")))
-        # self.users.append(self.f.create_contact("CONTACT", "Roger", "Dudule", "roger.legume@gmail.com", phone=digits(8, "06")))
-        # self.users.append(self.f.create_contact("CONTACT", "Jerome", "Dudule", "jerome.banane@f80.fr", phone=digits(8, "06")))
-        # self.users.append(self.f.create_contact("CONTACT", "Didier", "Dudule", "didier.canard@f80.fr", phone=digits(8, "06")))
-        # self.f.fastMode = False
 
         cts = self.f.create_contact_list("Ma Liste_" + words(5),
                                     "Cette liste est utilisé pour la réalisation du toturial OASIS", index_type=8,
-                                    lst_contacts=["dudule", 1,2,3,4])
+                                    lst_contacts=[1,2,3,4],filter="dudule")
         mail_camp = self.f.create_mail_campagn(name="Ma campagne de mail_" + words(6),
-                                          description="Campagne utilisée à des fins de test", lst=[cts])
+                                          description="Campagne utilisée à des fins de test", lst=[0],filter=cts)
         self.f.create_mailing(mail_campagn=mail_camp, type_mailing=1, link_event=1, subject="Mailing de test")
         self.f.create_phone_campaign(name="Ma campagne de telephone", description=words(15), contacts=[cts])
 
         self.f.stop()
 
 
-    def scenario_creation_de_stage(self):
+    def scenario_creation_de_stage(self,title,width=1500):
+        self.f.size(width,1000)
         self.f.login("j.lecanu", "azerty")
-        self.f.capture(title="Création d'un stage")
-        #self.f.create_contact(prenom="Paulo",nom="Dudule",email="paul.dudule@gmail.com")
-        if self.f.create_stage(
-            [1, "fonction de stagiaire"],
-            "BAXTER",
-            ["12 rue martel","","75010","Paris"],
-            ["Paul","Dudule","Chef","0625252525"],
-            ["sujet du stage"]):
-            self.f.go("#name=INTERNSHIP&type=LIST")
-            self.f.show("hover detail",text="Après validation le stage apparait dans la liste des stages comme une liaison entre un étudiant et une société")
+        self.f.capture(title=title,subtitle="Décomposition de la procédure")
 
-        self.f.stop(title="Fin")
+        if self.f.create_stage(
+                "Ballu",["fonction de stagiaire","","","1924564564874684","Ma caisse d'assurance","456467874561231"],"BAXTER",
+                ["12 rue martel","","75010","Paris"],
+                ["Paul","Dudule","Chef","0625252525"],
+                ["sujet du stage","Comment je me suis réconcillié, ma vie sexuelle / Arnaud Desch","Assistance à la réalisation du scénario",1,"Dudule","Sophie","0606060006","sophie.dudule@gmail.com"],
+                [1, "3 jours", "Travail exceptionnel le dimanche et certains jours fériés", "01/07/2020", "01/09/2020",
+                 "première période", 1, "120"]):
+            self.f.go("#name=INTERNSHIP&type=LIST")
+            self.f.show("hover detail",text="Dés validation le stage apparait dans la liste")
+
+        self.f.stop(title="Procédure terminée",subtitle="Le stage peut ensuite être modifié ou simplement supprimé si besoin")
         return True
 
 

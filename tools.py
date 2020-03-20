@@ -8,6 +8,7 @@ import pyautogui
 import unidecode as unidecode
 from google.cloud import texttospeech
 from nerodia.browser import Browser
+from nerodia.window import Window
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -47,18 +48,18 @@ class Tools:
         offset = 125
         self.mon = {
             "top": self.browser.window().position.y + offset,
-            "left": self.browser.window().position.x,
-            "width": self.browser.window().size.width,
+            "left": self.browser.window().position.x+10,
+            "width": self.browser.window().size.width-10,
             "height": self.browser.window().size.height - offset - 5
         }
 
-    def mobile(self,position=0,width=250):
+    def mobile(self,position=0,width=350):
         self.browser.window().move_to(position*width*1.5, 0)
         self.browser.window().resize_to(width, width * 4)
         self.init_zone_capture()
 
 
-    def go(self,url:str,subtitle=""):
+    def go(self,url:str=".",subtitle=""):
         if not url.startswith("http"):url=self.browser.url.split(".com")[0]+".com/"+url
         if self.browser.url==url:return True
         self.browser.goto(url)
@@ -144,6 +145,9 @@ class Tools:
             #L'objet à trouvé à directement été passé en argument
             return id
 
+    def size(self, width, height):
+        self.browser.window().resize_to(width,height)
+        self.init_zone_capture()
 
 
     def click(self,id,index=0,timeout=0.2,text=""):
@@ -185,11 +189,14 @@ class Tools:
             self.sct.compression_level = 2
 
         interval_en_minutes=1/(self.fps*60)
+
+        self.insertCache("black", id_cache="cache_capture", position=9999,delayInSec=0.1)
         self.scheduler.add_job(self.job_capture,"interval",minutes=interval_en_minutes,max_instances=1,id="capture_job")
         self.dtStartCapture = self.now()
         self.fastMode=False
         if len(title)>0:
             self.title(title,subtitle=subtitle,background="black")
+            self.removeCache(id_cache="cache_capture")
 
 
 
@@ -271,13 +278,13 @@ class Tools:
         #     if len(indexes)==0:indexes.append(1)
 
         zone_filter=self.find(id="form-control fsInputFilter", index=0)
-        self.show(zone_filter,"Afin de simplifier le choix dans la liste, il est possible de réduire le nombre d'élément via la zone de filtre")
+        self.show(zone_filter,"Afin de simplifier le choix dans la liste, il est possible de réduire le nombre d'éléments via la zone de filtre")
         zone_filter.focus()
         if len(filter) > 0:
             self.browser.send_keys(Keys.CONTROL+"a")
-            self.browser.send_keys(filter)
+            self.clavier(filter)
             if multi:self.clavier("{{ENTER}}")
-            self.subtitle("L'application du filtre se fait au fur et à mesure de la frappe")
+            self.subtitle("La liste se réduit dés les premiers caractére saisie dans le filtre")
 
         if multi:
             l_index=list()
@@ -560,11 +567,12 @@ class Tools:
             if len(subtitle)>0:to_speak=to_speak+".<break time=\"0.2s\"/>"+subtitle
 
             delay=self.speak("<speak>"+to_speak+"</speak>")
+            if delay<2:delay=2
             self.execute("showTitle",title,subtitle,delay*1000+500,"color:white")
             self.wait(delay-1)
 
             if len(background) > 0:
-                self.removeCache(id_cache)
+                self.removeCache(id_cache=id_cache)
                 self.wait(0.5)
 
 
@@ -628,8 +636,8 @@ class Tools:
 
         self.execute("insertCache",delayInSec,style,position,id_cache)
 
-    def removeCache(self,id="TAC_cache"):
-        self.execute("removeCache",id)
+    def removeCache(self,id_cache="TAC_cache"):
+        self.execute("removeCache",id_cache)
 
 
 

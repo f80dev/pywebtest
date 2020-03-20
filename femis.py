@@ -6,15 +6,21 @@ from utils import extract, tirage
 
 
 class FemisUser(Tools):
-    def __init__(self,username="",password="",fastMode=True):
+    def __init__(self,username="",password="",fastMode=True,prod=False):
         super().__init__()
-        self.start()
+        self.start(prod)
         self.fastMode=fastMode
         self.login(username, password)
 
-    def start(self):
-        self.maximize()
-        self.go("https://testfemis.scolasis.com/")
+    def start(self,prod=False):
+        self.size(1400,1000)
+
+        if prod:
+            self.domain ="https://femis.scolasis.com/"
+        else:
+            self.domain = "https://testfemis.scolasis.com/"
+
+        self.go(self.domain)
 
 
     def removeAlert(self):
@@ -91,20 +97,25 @@ class FemisUser(Tools):
 
 
 
-    def create_stage(self, documents,societe,lieux,signataire,sujet):
+    def create_stage(self, student,documents,societe,lieux,signataire,sujet,dates):
         self.go("#type=INSERT&name=INTERNSHIP")
-        self.fill_form(documents,first="STUDENT")
-        self.click("ATabLocation",text="Il est nécéssaire de préciser le lieu du stage")
-        self.click("fsContainer",0)
+        self.subtitle("La première étape de création d'un stage commence par sélectionner l'étudiant concerné par le stage")
+        self.click(self.pere(self.find("STUDENT", 0)))
+        self.select_in_list(student,student, multi=False)
+        self.fill_form(documents,first="POSITION")
+        self.click("ATabLocation")
+        self.subtitle("Dans l'onglet suivant on précise la société proposant le stage, le lieu et les représentants")
+        self.click(self.pere(self.find("COMPANY",0)))
         self.select_in_list(societe,societe,multi=False)
         self.fill_form(lieux,first="INTERNSHIP_BUSINESS_ADDRESS-1-ADDRESS")
         self.fill_form(signataire,first="CIE_SIGNATORY_LNAME")
-        self.click("ATabSubject",text="Ici, on va préciser le sujet du stage et donner des informations sur le tuteur")
+        self.click("ATabSubject")
+        self.subtitle("Ici, on va préciser le sujet du stage et donner des informations sur le tuteur")
         self.fill_form(sujet,first="SUBJECT")
-        self.click("ATabDates",text="Cette zone va permettre de préciser la quantité d'heure par semaine")
-        self.fill_form([1,"3 heures"],first="HOURS_PER_WEEK")
-        self.subtitle("La saisie terminée, on valide le stage")
-        self.click("btn btn-lg btn-danger floating_toolbar",0)
+        self.click("ATabDates")
+        self.subtitle("Cette zone va permettre de préciser la quantité d'heure par semaine")
+        self.fill_form(dates,first="HOURS_PER_WEEK")
+        self.click("btn btn-lg btn-danger floating_toolbar",0,text="La saisie terminée, on valide le stage")
         return True
 
 
@@ -120,30 +131,22 @@ class FemisUser(Tools):
 
         self.fill_form("tab-content",vals,"btn btn-lg btn-danger floating_toolbar")
 
-    def create_contact(self, type="STUDENT_FI",gender=1,prenom="Paul",nom="Dudule",
-                       email="paul.dudule@gmail.com",
-                       birthdate="04/02/1971",country=3,nationality=10,
-                       subtitle="",phone="",address="",password="",complements=dict()):
+    def create_contact(self, type="STUDENT_FI",props=list(),complements=dict(),password=""):
         self.go("#type=INSERT&name="+type)
         self.subtitle("Les champs obligatoires sont marqués d'une étoile rouge")
         self.subtitle("L'utilisateur peut choisir le mot de passe de l'étudiant ou demandé au système de le générer aléatoirement")
-        if len(password)==0:
-            self.click("generatePassword btn btn-primary")
-        else:
-            self.clavier(password,"PASSWORD")
+        if type=="STUDENT_FI":
+            if len(password)==0:
+                self.click("generatePassword btn btn-primary")
+            else:
+                self.clavier(password,"PASSWORD")
 
-        self.select(self.find("GENDER",0), gender)
-        self.clavier(nom, "LNAME",wait=0.2)
-        self.clavier(address,"ADDRESS",wait=0.2)
-        self.clavier(prenom,"FNAME",wait=0.2)
-        self.clavier(email,"MAIL","L'email de l'étudiant sera utilisé pour toute la communication avec l'école")
-        self.clavier(phone,"PHONE")
-        self.select(self.find("GENDER",0), gender)
+        self.fill_form(props,first="GENDER")
 
-        if len(birthdate)>0:
-            self.scroll_down()
-            zone=self.pere(self.find("label","DATE DE NAISSANCE"))
-            self.fill_form([birthdate,country,nationality],first=self.find("input",0,zone))
+        # if len(birthdate)>0:
+        #     self.scroll_down()
+        #     zone=self.pere(self.find("label","DATE DE NAISSANCE"))
+        #     self.fill_form([birthdate,country,nationality],first=self.find("input",0,zone))
 
         for k in complements.keys():
             self.clavier(complements[k],k)
@@ -165,7 +168,7 @@ class FemisUser(Tools):
 
 
 
-    def create_contact_list(self,name,description="",index_type=8,lst_contacts:list=[1]):
+    def create_contact_list(self,name,description="",index_type=8,lst_contacts:list=[1],filter=""):
         """
         :param name:
         :param description:
@@ -185,6 +188,7 @@ class FemisUser(Tools):
         if self.click(option,text="On choisit un type de contact à insérer dans la liste proposée"):
             self.create_link(id_zone="PropertyFields_CONTACT",
                              lst=lst_contacts,
+                             filter=filter,
                              text="Sélectionner des contacts à inclure dans la liste",
                              show_result="L'ensemble des contacts inclus dans la liste est affiché immédiatement",
                              description_zone="Cette zone va permettre de sélectionner les contacts à introduire dans la liste à construire")
@@ -195,11 +199,11 @@ class FemisUser(Tools):
 
 
 
-    def create_mail_campagn(self, name, description,lst):
+    def create_mail_campagn(self, name, description,lst,filter=""):
         self.title("Création d'une campagne de mail","Associé un mail type avec un ensemble de contacts")
         self.go("#type=INSERT&name=CRM_CAMPAIGN_MAIL")
         self.fill_form([name, description,1], first="NAME",validate="btn btn-lg btn-danger floating_toolbar")
-        self.create_link("PropertyFields_CRM_LISTING",lst,"Lié des contacts à la campagne","La liste de contacts est maintenant associé au la campagne")
+        self.create_link("PropertyFields_CRM_LISTING",lst,"Lié des contacts à la campagne","La liste de contacts est maintenant associé a la campagne",filter=filter)
         return name
 
 
@@ -224,7 +228,7 @@ class FemisUser(Tools):
 
 
 
-    def create_link(self, id_zone, lst, text,show_result="",description_zone=""):
+    def create_link(self, id_zone, lst, text,show_result="",description_zone="",filter=""):
         """
         Permet de créer des liens avec les entités référentes
         :param id_zone:
@@ -232,11 +236,11 @@ class FemisUser(Tools):
         :param text:
         :return:
         """
-        self.show("PropertyFields_CONTACT",description_zone)
+        self.show(id_zone,description_zone)
         zone = self.find(id_zone, 0)
         button = self.find("button", 0, zone)
         self.click(button, text)
-        self.select_in_list(lst)
+        self.select_in_list(lst,filter=filter)
         self.click(self.find("button", 1, zone))
         if len(show_result)>0:
             self.show("table table-striped table-hover",show_result)
@@ -284,6 +288,8 @@ class FemisUser(Tools):
         self.wait(delayInSecBetweenScreen)
         self.go("#codepage=CDT___FOLDER_FI",subtitle="Enfin il transfmet à l'école les différents documents nécéssaires à la validation du dossier")
         self.wait(delayInSecBetweenScreen)
+
+
 
 
 
