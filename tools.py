@@ -1,3 +1,4 @@
+import os
 import subprocess
 from datetime import datetime
 from os.path import exists
@@ -29,10 +30,12 @@ class Tools:
     browser=None
     dtStartCapture=None
     histo=list()
+
     fps=15 #réalisation du film a 15 images par secondes
 
     def __init__(self):
         self.capture_file=""
+        self.subdir = ""
         self.client=None
         self.frames=[]
         self.player=None
@@ -168,7 +171,24 @@ class Tools:
         return True
 
 
-    def capture(self,filename="",title="",subtitle=""):
+    def video(self,src,top=0,left=0,width="100vw",height="100vh",delayInSec=3,new_window=False):
+        if new_window:
+            videoBrowser = Browser(WebDriver())
+            videoBrowser.title=""
+            videoBrowser.status=""
+            videoBrowser.original_window.position.x=self.browser.window().position.x+left
+            videoBrowser.original_window.position.y = self.browser.window().position.y + top
+            videoBrowser.original_window.size.width=width
+            videoBrowser.original_window.size.height= height
+            self.execute("playVideo", src, 0, 0, "100vw", "100vh", delayInSec * 1000,videoBrowser)
+        else:
+            self.execute("playVideo",src,top,left,width,height,delayInSec*1000)
+
+        self.wait(delayInSec)
+
+
+
+    def capture(self,filename="",title="",subtitle="",background="black"):
         """
 
         :param name:
@@ -178,7 +198,7 @@ class Tools:
         """
 
         if len(filename)==0:
-            filename=unidecode.unidecode(title.replace(" ","_").replace("'","_"))
+            filename=unidecode.unidecode(title.replace(" ","_").replace("'","_").replace("é","e"))
             self.log("Génération du nom de fichier depuis le titre : "+filename)
 
         if len(self.capture_file)>0:self.stop(10)
@@ -195,29 +215,47 @@ class Tools:
         self.dtStartCapture = self.now()
         self.fastMode=False
         if len(title)>0:
-            self.title(title,subtitle=subtitle,background="black")
+            self.title(title,subtitle=subtitle,background=background)
             self.removeCache(id_cache="cache_capture")
 
 
 
 
 
-    def fill_form(self,values,first=None,validate=None):
+    def fill_form(self,values,first=None,validate=None,comments=[]):
         if not first is None:
-            self.focus(self.find(first,0))
+            if first=="{{TAB}}":
+                self.browser.send_keys(Keys.TAB)
+            else:
+                self.focus(self.find(first,0))
 
         index=0
+        iComments=0
+        comments=comments+[""]*(len(values))
         for val in values:
-            if type(val)==int:
+            #Selection dans une liste déroulante
+            if type(val)==int and val>0:
+                self.browser.send_keys(Keys.ENTER)
                 for i in range(val):
+                    if not self.fastMode:self.wait(0.2)
                     self.browser.send_keys(Keys.ARROW_DOWN)
+                if not self.fastMode: self.wait(0.3)
+                self.browser.send_keys(Keys.ENTER)
 
             if type(val)==bool:
+                self.subtitle(comments[iComments])
                 self.browser.send_keys(Keys.SPACE)
+
+            if type(val) == list:
+                elt = self.driver.switch_to.active_element
+                self.show(elt, comments[iComments])
+                self.browser.send_keys(Keys.ENTER)
+                self.select_in_list(val,multi=True)
 
             if type(val)==str:
                 if val.startswith("list:"):
                     elt=self.driver.switch_to.active_element
+                    self.show(elt,comments[iComments])
                     self.browser.send_keys(Keys.ENTER)
                     self.select_in_list(list((val.split("list:")[1]).split(",")))
 
@@ -227,12 +265,21 @@ class Tools:
                         self.browser.send_keys(Keys.TAB)
                 else:
                     if len(val)>0:
-                        self.clavier(val)
-                        self.browser.send_keys(Keys.CONTROL+"s")
+                        if val=="{{TAB}}" or val=="{TAB}" or val=="TAB":
+                            self.browser.send_keys(Keys.TAB)
+                        else:
+                            if val.startswith("name:"):
+                                self.click(val.split("=")[0].replace("name:",""))
+                                val=val.split("=")[1]
+                            self.clavier(val,subtitle=comments[iComments])
+                            self.browser.send_keys(Keys.CONTROL+"s")
+
+            iComments=iComments+1
 
             if not self.fastMode:self.wait(0.5)
 
             index=index+1
+            #On passe au champs suivant
             if index < len(values): self.browser.send_keys(Keys.TAB)
 
         if not validate is None:
@@ -243,6 +290,8 @@ class Tools:
                 return self.click(validate,0)
 
 
+
+
     def clavier(self,text,elt=None,subtitle="",waitInSec=0):
         if len(text)==0:return False
         if len(subtitle)>0:self.show(elt,subtitle)
@@ -250,6 +299,7 @@ class Tools:
             if type(elt)==str:elt=self.find(elt,0)
             elt.focus()
         text=text.replace("{{ENTER}}",Keys.ENTER)
+        text = text.replace("{{TAB}}", Keys.TAB)
 
         dtStart = self.now()
         for ch in text:
@@ -260,6 +310,8 @@ class Tools:
         self.wait(waitInSec)
 
         return True
+
+
 
 
 
@@ -277,14 +329,18 @@ class Tools:
         #     del indexes[0]
         #     if len(indexes)==0:indexes.append(1)
 
-        zone_filter=self.find(id="form-control fsInputFilter", index=0)
-        self.show(zone_filter,"Afin de simplifier le choix dans la liste, il est possible de réduire le nombre d'éléments via la zone de filtre")
-        zone_filter.focus()
-        if len(filter) > 0:
+        zone_filter = self.find(id="form-control fsInputFilter", index=0)
+        if len(filter)>0:
+            self.show(zone_filter,"Afin de simplifier le choix dans la liste, il est possible de réduire le nombre d'éléments via la zone de filtre")
+            zone_filter.focus()
+
             self.browser.send_keys(Keys.CONTROL+"a")
             self.clavier(filter)
+            self.wait(0.5)
             if multi:self.clavier("{{ENTER}}")
             self.subtitle("La liste se réduit dés les premiers caractére saisie dans le filtre")
+        else:
+            zone_filter.focus()
 
         if multi:
             l_index=list()
@@ -296,9 +352,14 @@ class Tools:
             self.subtitle("On peut sélectionner tous les éléments de la liste ou n'en prendre que certains grâce aux case à cocher")
             for i in range(max(l_index)+1):
                 self.browser.send_keys(Keys.TAB)
-                if i in l_index:self.browser.send_keys(Keys.SPACE)
+                if i in l_index:
+                    self.browser.send_keys(Keys.SPACE)
+                    self.add_click()
+                if not self.fastMode:self.wait(0.1)
 
-            self.click_at(50, 50,"Pour valider le choix, il suffit de cliquer en dehors de la liste")
+                if not self.fastMode:self.wait(0.3)
+            self.wait(1)
+            self.click_at(50, 50)
         else:
             elt=self.find("label",indexes[0])
             self.click(elt)
@@ -309,6 +370,8 @@ class Tools:
     def click_at(self,x,y,subtitle=""):
         pyautogui.click(self.browser.window().position.x + x,self.browser.window().position.y+100+y)
         self.subtitle(subtitle)
+
+
 
 
     def fill_form_old(self, zone, vals, submit):
@@ -338,9 +401,11 @@ class Tools:
 
 
 
-    def stop(self,title="",subtitle="",offset=0):
+    def stop(self,title="",subtitle="",offset=0,subdir="",extension="webm"):
+        if len(subdir)>0:self.subdir=subdir
         if len(self.frames)==0:return False
-        self.title(title,subtitle=subtitle)
+        self.title(title,subtitle=subtitle,removeCache=False)
+
         self.log("Fin de la capture")
         self.scheduler.remove_job(job_id="capture_job")
         video = cv2.VideoWriter('./'+self.capture_file+'.avi',
@@ -348,6 +413,7 @@ class Tools:
                                 self.fps,
                                 (self.mon["width"], self.mon["height"])
                                 )
+        self.removeCache()
 
         self.log("Encodage de "+str(len(self.frames))+" images")
         for frame in self.frames:
@@ -362,9 +428,16 @@ class Tools:
         #format = self.videoBatchFile.substring(videoFile.lastIndexOf(".") + 1).toLowerCase().trim();
         #new_name = self.videoBatchFile.replace("tags", tags.replace("#", "")).replaceAll(" ", "_").replaceAll("_temp", "");
 
-        self.videoBatchFile =self.videoBatchFile + "\ndel \""+self.capture_file+".mkv\"\nffmpeg -i \"" + self.capture_file+".avi" + "\" -i input.wav -c copy "+self.capture_file+".mkv\n"
+        # -c copy
+        self.videoBatchFile =self.videoBatchFile + "\ndel \""+self.capture_file+"."\
+                             +extension+"\"\nffmpeg -i \"" + self.capture_file+".avi" \
+                             + "\" -i input.wav -c:v libvpx-vp9 -crf 30 -b:v 0 "+self.capture_file+"."+extension+"\n"
         #TODO le lancement de la vidéo ne fonctionne pas
         #self.videoBatchFile = self.videoBatchFile +"\ncall \""+self.capture_file+".mkv\""
+
+        if len(self.subdir)>0:
+            if not os.path.exists("./"+self.subdir):os.mkdir("./"+self.subdir)
+            self.videoBatchFile=self.videoBatchFile +"\nMOVE /Y "+self.capture_file+".* "+self.subdir
 
         with open(self.capture_file+".bat", "w") as text_file:
             text_file.write(self.videoBatchFile)
@@ -422,7 +495,7 @@ class Tools:
         :param output_filename:
         :return:
         """
-        if self.fastMode or self.dtStartCapture is None:return 0
+        if self.fastMode or self.dtStartCapture is None or len(text)==0:return 0
 
         if len(output_filename) == 0:
             output_filename = self.getSoundFile(text)
@@ -433,7 +506,9 @@ class Tools:
                 self.client = texttospeech.TextToSpeechClient().from_service_account_file(key_file)
 
             synthesis_input = texttospeech.types.SynthesisInput(ssml=text)
-            voice = texttospeech.types.VoiceSelectionParams(name="fr-FR-Wavenet-A",language_code=lang,ssml_gender=texttospeech.enums.SsmlVoiceGender.FEMALE)
+            voice = texttospeech.types.VoiceSelectionParams(name="fr-FR-Wavenet-B",
+                                                            language_code=lang,
+                                                            ssml_gender=texttospeech.enums.SsmlVoiceGender.MALE)
             #
             audio_config = texttospeech.types.AudioConfig(audio_encoding=texttospeech.enums.AudioEncoding.OGG_OPUS)
 
@@ -528,7 +603,7 @@ class Tools:
 
 
 
-    def show(self,id,text=""):
+    def show(self,id,text="",img="https://moziru.com/images/drawn-number-circle-png-10.png"):
         """
 
         :param id:
@@ -540,13 +615,13 @@ class Tools:
             elt=self.find(id,0)
             if not elt is None and not text in self.histo:
                 delay=self.subtitle(text,async=True)
-                self.execute("showElement", elt.location.x,elt.location.y,elt.size.width,elt.size.height, "https://moziru.com/images/drawn-number-circle-png-10.png",delay*1000)
+                self.execute("showElement", elt.location.x,elt.location.y,elt.size.width,elt.size.height, img,delay*1000)
                 self.wait(delay)
         return delay
 
 
 
-    def title(self,title,subtitle="",style="",background="black"):
+    def title(self,title,subtitle="",style="",background="black",removeCache=True):
         """
 
         :param title:
@@ -567,11 +642,11 @@ class Tools:
             if len(subtitle)>0:to_speak=to_speak+".<break time=\"0.2s\"/>"+subtitle
 
             delay=self.speak("<speak>"+to_speak+"</speak>")
-            if delay<2:delay=2
+            if delay<3:delay=3
             self.execute("showTitle",title,subtitle,delay*1000+500,"color:white")
             self.wait(delay-1)
 
-            if len(background) > 0:
+            if len(background) > 0 and removeCache:
                 self.removeCache(id_cache=id_cache)
                 self.wait(0.5)
 
@@ -588,12 +663,17 @@ class Tools:
         with open("js/"+file+".js", "r") as myfile:
             data= "".join(myfile.readlines())
 
+        browserToExecute=self.browser
+
         i=0
         for arg in args:
-            i=i+1
-            data=data.replace("#"+str(i),str(arg))
+            if type(arg)==Browser:
+                browserToExecute=arg
+            else:
+                i=i+1
+                data=data.replace("#"+str(i),str(arg))
 
-        self.browser.execute_script(data)
+        browserToExecute.execute_script(data)
 
 
     def select(self, elt, value):
