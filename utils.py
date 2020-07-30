@@ -36,7 +36,8 @@ def random_email():
 def postal_address(prop:str=""):
     prop=prop.lower()
     if prop=="address":prop="adresse"
-    rc=dict({"adresse":tirage(999)+", rue de "+words(1),"cp":tirage(99999),"ville":words(1)});
+    txtAddress=tirage(999)+", rue de "+words(1)
+    rc=dict({"adresse":txtAddress,"cp":tirage(99999),"ville":words(1),"town":words(1),"address":txtAddress});
     if prop=="all":return str(" ".join(rc.values()))
     if len(prop)==0 or not prop in rc:
         return rc

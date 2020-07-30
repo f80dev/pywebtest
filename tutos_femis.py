@@ -194,9 +194,15 @@ class TutoFemis:
 
     def create_profil(self,type="STUDENT_FI",profils=[{"email":"herve.hoareau@f80.fr"}]):
         for p in profils:
-            #if type(p)==str:p=dict({"email":p})
-            if not "firstname" in p:p["firstname"]=p["email"].split("@")[0].split(".")[0]
-            if not "lastname" in p:p["lastname"] = p["email"].split("@")[0].split(".")[1]
+            if isinstance(p,str):p=dict({"email":p})
+            username=p["email"].split("@")[0]
+            if not "firstname" in p:p["firstname"]=username.split(".")[0]
+            if not "lastname" in p:
+                if "." in username:
+                    p["lastname"] = username.split(".")[1]
+                else:
+                    p["lastname"]="dudule"
+
             p["login"]=p["firstname"][0:1]+p["lastname"]
             c=None
             if type=="STUDENT_FI":
@@ -219,9 +225,11 @@ class TutoFemis:
                                                          "Ceci est un étudiant fictif"])
 
             if type=="CONTACT":
-                c=self.users.append(self.f.create_contact(type,
-                                                        [1, p["lastname"], "04/02/" + digits(2, "19"), p["firstname"], "", "", "",
-                                                         p["email"], digits(8, "06")],first="GENDER"))
+                c=self.users.append(self.f.create_contact("CONTACT",
+                                                        [1, p["lastname"], p["lastname"], p["firstname"], "", "", "",
+                                                         p["email"], digits(8, "01"),digits(8,"06"),
+                                                         postal_address(prop="address"),"","",postal_address("cp"),postal_address("town"),1,
+                                                         "","","","","","","","contact fictif"],first="GENDER"))
 
             if type=="PROF":
                 c=self.f.create_contact("PROF", [

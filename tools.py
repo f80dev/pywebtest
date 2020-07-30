@@ -10,8 +10,10 @@ import unidecode as unidecode
 from google.cloud import texttospeech
 from nerodia.browser import Browser
 from nerodia.window import Window
+from selenium.webdriver import DesiredCapabilities
 
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.proxy import ProxyType, Proxy
 from selenium.webdriver.remote.webdriver import WebDriver
 import mss
 import mss.tools
@@ -27,13 +29,14 @@ from utils import getDuration
 class Tools:
 
     fastMode=False
+    metrics_cache=""
     browser=None
     dtStartCapture=None
     histo=list()
 
     fps=15 #réalisation du film a 15 images par secondes
 
-    def __init__(self):
+    def __init__(self,proxy=""):
         self.capture_file=""
         self.subdir = ""
         self.client=None
@@ -41,11 +44,24 @@ class Tools:
         self.player=None
         self.startLog=self.now()
         self.videoBatchFile=""
-        self.driver:WebDriver=WebDriver(command_executor="http://127.0.0.1:9515")
+
+        capabilities = DesiredCapabilities.CHROME
+        if len(proxy)>0:
+            p = Proxy()
+            p.proxy_type = ProxyType.MANUAL
+            p.http_proxy = proxy
+            p.socks_proxy = proxy
+            p.ssl_proxy = proxy
+            p.add_to_capabilities(capabilities)
+
+        self.driver:WebDriver=WebDriver(command_executor="http://127.0.0.1:9515",desired_capabilities=capabilities)
         self.driver.implicitly_wait(1)
         self.browser:Browser = Browser(self.driver)
         self.scheduler = BackgroundScheduler()
         self.scheduler.start()
+
+    def back(self):
+        self.browser.back()
 
     def init_zone_capture(self):
         offset = 125
@@ -61,9 +77,14 @@ class Tools:
         self.browser.window().resize_to(width, width * 4)
         self.init_zone_capture()
 
+    def export(self,format="html"):
+        if format=="html":
+            return self.browser.html
+        else:
+            return self.browser.text
 
     def go(self,url:str=".",subtitle=""):
-        if not url.startswith("http"):url=self.browser.url.split(".com")[0]+".com/"+url
+        if not url.startswith("http"):url=self.domain+url
         if self.browser.url==url:return True
         self.browser.goto(url)
         if len(subtitle)==0:
@@ -71,6 +92,25 @@ class Tools:
         else:
             self.subtitle(subtitle)
         return True
+
+
+    def metrics(self, tag=""):
+        if self.metrics_cache is None: self.metrics_cache = ""
+        self.metrics_cache = self.metrics_cache + str(int(datetime.today().timestamp()*1000)) + ";" + tag + "\n"
+
+
+    def write_metrics(self, filename=""):
+        if len(filename) == 0:
+            filename="session"+str(datetime.today().timestamp())
+
+        if not filename.endswith(".csv"):filename=filename+".csv"
+
+        with open(filename, "w") as text_file:
+            text_file.write(self.metrics_cache)
+
+        text_file.close()
+
+
 
 
     def scroll_down(self):
@@ -290,6 +330,8 @@ class Tools:
                 return self.click(validate,0)
 
 
+    def escape(self):
+        self.clavier("{{ESC}}")
 
 
     def clavier(self,text,elt=None,subtitle="",waitInSec=0):
@@ -300,6 +342,8 @@ class Tools:
             elt.focus()
         text=text.replace("{{ENTER}}",Keys.ENTER)
         text = text.replace("{{TAB}}", Keys.TAB)
+        text = text.replace("{{ESC}}", Keys.ESCAPE)
+        text = text.replace("{{ESCAPE}}", Keys.ESCAPE)
 
         dtStart = self.now()
         for ch in text:

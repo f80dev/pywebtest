@@ -1,12 +1,12 @@
 
-Kpython:S1481†"&Remove the unused local variable "rc".(†šß­şÿÿÿÿ8¾¬Ö„’.
-Jpython:S1481ş"%Remove the unused local variable "i".(‡Â˜Èùÿÿÿÿ8ŸÀ­å.
-Cpython:S125¨"Remove this commented out code.(ÎìÅ¿ûÿÿÿÿ8¥ÿã€°.
-wpython:S117"TRename this parameter "fastMode" to match the regular expression ^[_a-z][a-z0-9_]*$.(·©áÔûÿÿÿÿ8í÷¼ˆ.
-‚python:S117Ç"cRename this parameter "delayInSecBetweenScreen" to match the regular expression ^[_a-z][a-z0-9_]*$.(€õ­ÿ8¿üÆ.
-spython:S117""URename this parameter "withTitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(¶›óô8¯Ÿ²ö‹.
-Hpython:S1481€"(Remove the unused local variable "zone".(ØÎè8¾¬Ö„’.
-vpython:S107"RMethod "create_mailing" has 10 parameters, which is greater than the 7 authorized.(´ıÒùÿÿÿÿ8È®ºÅ.
-lpython:S107c"OMethod "create_stage" has 9 parameters, which is greater than the 7 authorized.(š’ÚI8ó«£Ú¤.
-‚python:S117í"^Rename this local variable "cmdCreateMail" to match the regular expression ^[_a-z][a-z0-9_]*$.(íÛÓ„şÿÿÿÿ8Ì«á†‘.
-vpython:S117""XRename this parameter "withSubtitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(¶›óô8Ø¨àÕ.
+jpython:S107"OMethod "create_stage" has 9 parameters, which is greater than the 7 authorized.(š’ÚI8ó«£Ú¤.
+python:S117"^Rename this local variable "cmdCreateMail" to match the regular expression ^[_a-z][a-z0-9_]*$.(íÛÓ„şÿÿÿÿ8Ì«á†‘.
+qpython:S117"URename this parameter "withTitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(¶›óô8Ø¨àÕ.
+python:S117"cRename this parameter "delayInSecBetweenScreen" to match the regular expression ^[_a-z][a-z0-9_]*$.(€õ­ÿ8¿üÆ.
+@python:S125"Remove this commented out code.(ÎìÅ¿ûÿÿÿÿ8¥ÿã€°.
+upython:S117"TRename this parameter "fastMode" to match the regular expression ^[_a-z][a-z0-9_]*$.(·©áÔûÿÿÿÿ8í÷¼ˆ.
+Hpython:S1481"&Remove the unused local variable "rc".(†šß­şÿÿÿÿ8¾¬Ö„’.
+Epython:S1481"(Remove the unused local variable "zone".(ØÎè8¾¬Ö„’.
+tpython:S117"XRename this parameter "withSubtitle" to match the regular expression ^[_a-z][a-z0-9_]*$.(¶›óô8¯Ÿ²ö‹.
+spython:S107"RMethod "create_mailing" has 10 parameters, which is greater than the 7 authorized.(´ıÒùÿÿÿÿ8È®ºÅ.
+Gpython:S1481"%Remove the unused local variable "i".(‡Â˜Èùÿÿÿÿ8ŸÀ­å.

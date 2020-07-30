@@ -1,3 +1,4 @@
 
-Ipython:S1481"%Remove the unused local variable "i".(ôÓ•„øÿÿÿÿ8™ë•³Š.
-xpython:S15425"TRename function "getDuration" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(ÙÁ”õùÿÿÿÿ8àŸ–ÕŠ.
+vpython:S1542"TRename function "getDuration" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(ÙÁ”õùÿÿÿÿ8àŸ–ÕŠ.
+Gpython:S1481"%Remove the unused local variable "i".(ôÓ•„øÿÿÿÿ8™ë•³Š.
+|python:S117"[Rename this local variable "txtAddress" to match the regular expression ^[_a-z][a-z0-9_]*$.( Ü¨ÿÿÿÿÿ8Ö›¯·.
